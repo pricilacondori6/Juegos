@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajedrez Neón</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            animation: bgPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientFlow 3s linear infinite;
+        }
+
+        @keyframes gradientFlow {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 640px;
+            margin: 0 auto 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #0ff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .turn-indicator {
+            font-size: 1.5em;
+            color: #0ff;
+            text-shadow: 0 0 15px #0ff;
+            letter-spacing: 2px;
+        }
+
+        .reset-btn {
+            padding: 12px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: transparent;
+            color: #f0f;
+            border: 2px solid #f0f;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .reset-btn:hover {
+            background: #f0f;
+            color: #000;
+            box-shadow: 0 0 30px #f0f;
+            transform: scale(1.05);
+        }
+
+        #chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 80px);
+            grid-template-rows: repeat(8, 80px);
+            gap: 0;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            border: 3px solid #0ff;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 255, 0.5),
+                inset 0 0 40px rgba(0, 255, 255, 0.1);
+        }
+
+        .square {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .square.light {
+            background: rgba(50, 50, 70, 0.5);
+        }
+
+        .square.dark {
+            background: rgba(10, 10, 30, 0.8);
+        }
+
+        .square:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .square.light:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.6),
+                inset 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .square.dark:hover {
+            background: rgba(255, 0, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(255, 0, 255, 0.6),
+                inset 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        .square.selected {
+            background: rgba(0, 255, 0, 0.4) !important;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.8),
+                inset 0 0 30px rgba(0, 255, 0, 0.4);
+            animation: selectedPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .square.valid-move {
+            background: rgba(255, 255, 0, 0.3) !important;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+        }
+
+        .square.valid-move::after {
+            content: '●';
+            position: absolute;
+            color: #ff0;
+            font-size: 0.5em;
+            text-shadow: 0 0 10px #ff0;
+        }
+
+        .piece {
+            filter: drop-shadow(0 0 10px currentColor);
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .piece.white {
+            color: #0ff;
+            text-shadow: 
+                0 0 15px #0ff,
+                0 0 25px #0ff;
+        }
+
+        .piece.black {
+            color: #f0f;
+            text-shadow: 
+                0 0 15px #f0f,
+                0 0 25px #f0f;
+        }
+
+        .piece:hover {
+            transform: scale(1.15);
+        }
+
+        .captured-pieces {
+            display: flex;
+            justify-content: space-around;
+            max-width: 640px;
+            margin: 30px auto;
+            gap: 20px;
+        }
+
+        .captured-section {
+            flex: 1;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            border: 2px solid;
+        }
+
+        .captured-section.white-captured {
+            border-color: #0ff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .captured-section.black-captured {
+            border-color: #f0f;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+        }
+
+        .captured-section h3 {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .captured-section.white-captured h3 {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .captured-section.black-captured h3 {
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        .captured-list {
+            font-size: 1.8em;
+            min-height: 40px;
+        }
+
+        @media (max-width: 768px) {
+            #chessboard {
+                grid-template-columns: repeat(8, 50px);
+                grid-template-rows: repeat(8, 50px);
+            }
+            .square {
+                width: 50px;
+                height: 50px;
+                font-size: 2em;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>♔ AJEDREZ NEÓN ♔</h1>
+        
+        <div class="game-info">
+            <div id="turnIndicator" class="turn-indicator">Turno: BLANCAS</div>
+            <button id="resetButton" class="reset-btn">Nueva Partida</button>
+        </div>
+
+        <div id="chessboard"></div>
+
+        <div class="captured-pieces">
+            <div class="captured-section white-captured">
+                <h3>Capturadas Blancas</h3>
+                <div id="whiteCaptured" class="captured-list"></div>
+            </div>
+            <div class="captured-section black-captured">
+                <h3>Capturadas Negras</h3>
+                <div id="blackCaptured" class="captured-list"></div>
+            </div>
+        </div>
+        <button id="resetButton" class="reset-btn"><a href="http://127.0.0.1:5500/Inicio.html#juegos">Inicio</a></button>
+    </div>
+
+    <script>
+        const board = document.getElementById('chessboard');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const resetButton = document.getElementById('resetButton');
+        const whiteCaptured = document.getElementById('whiteCaptured');
+        const blackCaptured = document.getElementById('blackCaptured');
+
+        let gameState = {
+            board: [],
+            currentTurn: 'white',
+            selectedSquare: null,
+            whiteCapturedPieces: [],
+            blackCapturedPieces: []
+        };
+
+        const pieces = {
+            white: {
+                king: '♔',
+                queen: '♕',
+                rook: '♖',
+                bishop: '♗',
+                knight: '♘',
+                pawn: '♙'
+            },
+            black: {
+                king: '♚',
+                queen: '♛',
+                rook: '♜',
+                bishop: '♝',
+                knight: '♞',
+                pawn: '♟'
+            }
+        };
+
+        function initBoard() {
+            gameState.board = [
+                ['♜','♞','♝','♛','♚','♝','♞','♜'],
+                ['♟','♟','♟','♟','♟','♟','♟','♟'],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                [null,null,null,null,null,null,null,null],
+                ['♙','♙','♙','♙','♙','♙','♙','♙'],
+                ['♖','♘','♗','♕','♔','♗','♘','♖']
+            ];
+            gameState.currentTurn = 'white';
+            gameState.selectedSquare = null;
+            gameState.whiteCapturedPieces = [];
+            gameState.blackCapturedPieces = [];
+            renderBoard();
+            updateTurnIndicator();
+            updateCapturedPieces();
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = 'square ' + ((row + col) % 2 === 0 ? 'light' : 'dark');
+                    square.id = `square-${row}-${col}`;
+                    
+                    const piece = gameState.board[row][col];
+                    if (piece) {
+                        const pieceSpan = document.createElement('span');
+                        pieceSpan.className = 'piece ' + (isWhitePiece(piece) ? 'white' : 'black');
+                        pieceSpan.textContent = piece;
+                        square.appendChild(pieceSpan);
+                    }
+                    
+                    square.onclick = () => handleSquareClick(row, col);
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(row, col) {
+            const clickedPiece = gameState.board[row][col];
+            
+            if (gameState.selectedSquare) {
+                const [selectedRow, selectedCol] = gameState.selectedSquare;
+                
+                if (isValidMove(selectedRow, selectedCol, row, col)) {
+                    movePiece(selectedRow, selectedCol, row, col);
+                    clearSelection();
+                    switchTurn();
+                } else {
+                    clearSelection();
+                    if (clickedPiece && isPieceOfCurrentPlayer(clickedPiece)) {
+                        selectSquare(row, col);
+                    }
+                }
+            } else {
+                if (clickedPiece && isPieceOfCurrentPlayer(clickedPiece)) {
+                    selectSquare(row, col);
+                }
+            }
+        }
+
+        function selectSquare(row, col) {
+            gameState.selectedSquare = [row, col];
+            const squareElement = document.getElementById(`square-${row}-${col}`);
+            squareElement.classList.add('selected');
+            showValidMoves(row, col);
+        }
+
+        function clearSelection() {
+            if (gameState.selectedSquare) {
+                const [row, col] = gameState.selectedSquare;
+                const squareElement = document.getElementById(`square-${row}-${col}`);
+                squareElement.classList.remove('selected');
+            }
+            gameState.selectedSquare = null;
+            clearValidMoves();
+        }
+
+        function showValidMoves(row, col) {
+            const moves = getValidMoves(row, col);
+            moves.forEach(([r, c]) => {
+                const squareElement = document.getElementById(`square-${r}-${c}`);
+                squareElement.classList.add('valid-move');
+            });
+        }
+
+        function clearValidMoves() {
+            document.querySelectorAll('.valid-move').forEach(el => {
+                el.classList.remove('valid-move');
+            });
+        }
+
+        function getValidMoves(row, col) {
+            const moves = [];
+            const directions = [
+                [-1,-1], [-1,0], [-1,1],
+                [0,-1],          [0,1],
+                [1,-1],  [1,0],  [1,1]
+            ];
+
+            directions.forEach(([dr, dc]) => {
+                const newRow = row + dr;
+                const newCol = col + dc;
+                if (newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                    const targetPiece = gameState.board[newRow][newCol];
+                    if (!targetPiece || !isPieceOfCurrentPlayer(targetPiece)) {
+                        moves.push([newRow, newCol]);
+                    }
+                }
+            });
+
+            return moves;
+        }
+
+        function isValidMove(fromRow, fromCol, toRow, toCol) {
+            if (toRow < 0 || toRow >= 8 || toCol < 0 || toCol >= 8) return false;
+            
+            const targetPiece = gameState.board[toRow][toCol];
+            if (targetPiece && isPieceOfCurrentPlayer(targetPiece)) return false;
+
+            const validMoves = getValidMoves(fromRow, fromCol);
+            return validMoves.some(([r, c]) => r === toRow && c === toCol);
+        }
+
+        function movePiece(fromRow, fromCol, toRow, toCol) {
+            const capturedPiece = gameState.board[toRow][toCol];
+            
+            if (capturedPiece) {
+                if (isWhitePiece(capturedPiece)) {
+                    gameState.whiteCapturedPieces.push(capturedPiece);
+                } else {
+                    gameState.blackCapturedPieces.push(capturedPiece);
+                }
+                updateCapturedPieces();
+            }
+
+            gameState.board[toRow][toCol] = gameState.board[fromRow][fromCol];
+            gameState.board[fromRow][fromCol] = null;
+            renderBoard();
+        }
+
+        function isPieceOfCurrentPlayer(piece) {
+            return (gameState.currentTurn === 'white' && isWhitePiece(piece)) ||
+                   (gameState.currentTurn === 'black' && !isWhitePiece(piece));
+        }
+
+        function isWhitePiece(piece) {
+            return ['♔','♕','♖','♗','♘','♙'].includes(piece);
+        }
+
+        function switchTurn() {
+            gameState.currentTurn = gameState.currentTurn === 'white' ? 'black' : 'white';
+            updateTurnIndicator();
+        }
+
+        function updateTurnIndicator() {
+            const turnText = gameState.currentTurn === 'white' ? 'BLANCAS' : 'NEGRAS';
+            turnIndicator.textContent = `Turno: ${turnText}`;
+            turnIndicator.style.color = gameState.currentTurn === 'white' ? '#0ff' : '#f0f';
+            turnIndicator.style.textShadow = gameState.currentTurn === 'white' ? 
+                '0 0 15px #0ff' : '0 0 15px #f0f';
+        }
+
+        function updateCapturedPieces() {
+            whiteCaptured.textContent = gameState.whiteCapturedPieces.join(' ') || '---';
+            blackCaptured.textContent = gameState.blackCapturedPieces.join(' ') || '---';
+        }
+
+        resetButton.onclick = initBoard;
+
+        initBoard();
+    </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 50%, #0a0a0a 100%);
+            z-index: -1;
+        }
+
+        .bg-animation::before,
+        .bg-animation::after {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(100px);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bg-animation::before {
+            background: rgba(0, 255, 255, 0.1);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .bg-animation::after {
+            background: rgba(255, 0, 255, 0.1);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 7s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(100px, -100px) scale(1.1); }
+            66% { transform: translate(-100px, 100px) scale(0.9); }
+        }
+
+        /* Header */
+        header {
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #0ff;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 30px #0ff;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
+            50% { text-shadow: 0 0 20px #0ff, 0 0 30px #0ff, 0 0 40px #0ff, 0 0 50px #0ff; }
+        }
+
+        nav {
+            display: flex;
+            gap: 40px;
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #f0f;
+            box-shadow: 0 0 10px #f0f;
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 5em;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #0ff, #f0f, #0ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 3s linear infinite;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            color: #ccc;
+            margin-bottom: 40px;
+            max-width: 700px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 18px 45px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-primary {
+            background: transparent;
+            color: #0ff;
+            border: 3px solid #0ff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .btn-primary:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #f0f;
+            border: 3px solid #f0f;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: #f0f;
+            color: #000;
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.8);
+            transform: translateY(-3px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 50px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 50px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid #0ff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent);
+            transform: scale(0);
+            transition: transform 0.6s;
+        }
+
+        .feature-card:hover::before {
+            transform: scale(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: #f0f;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 255, 0.6),
+                inset 0 0 30px rgba(255, 0, 255, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 20px currentColor);
+        }
+
+        .feature-card:nth-child(1) .feature-icon { color: #0ff; }
+        .feature-card:nth-child(2) .feature-icon { color: #f0f; }
+        .feature-card:nth-child(3) .feature-icon { color: #0f0; }
+
+        .feature-card h3 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #0ff;
+        }
+
+        .feature-card:nth-child(2) h3 { color: #f0f; }
+        .feature-card:nth-child(3) h3 { color: #0f0; }
+
+        .feature-card p {
+            font-size: 1.1em;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-top: 2px solid #0ff;
+            box-shadow: 0 -10px 30px rgba(0, 255, 255, 0.2);
+        }
+
+        footer p {
+            color: #888;
+            font-size: 1em;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 3em;
+                letter-spacing: 5px;
+            }
+
+            nav {
+                gap: 20px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            header {
+                padding: 20px;
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <header>
+        <div class="logo">⚡ GAMES ⚡</div>
+    </header>
+
+    <section class="hero">
+        <h1>BIENVENIDO AL MUNDO DE JUEGOS</h1>
+        <p>Experimenta los Juegos 1vs1 donde solo cuenta la habilida ¡y demuestra quién es el mejor!</p>
+        <div class="cta-buttons">
+            <nav>
+            <button class="btn btn-primary"><span>🎮<a href="http://127.0.0.1:5500/juegos.html">Tres en Raya</a></span></button>
+            <button class="btn btn-secondary"><span>♟️ <a href="http://127.0.0.1:5500/juego2.html">Ajedrez</a></span></button>
+            </nav>
+        </div>
+    </section>
+    <footer>
+        <p>© 2025 Juegos - Todos los derechos reservados</p>
+    </footer>
+</body>
+</html>

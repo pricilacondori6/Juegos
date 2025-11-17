@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tres en Raya</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a2e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            animation: glow 2s ease-in-out infinite alternate;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 30px #0ff,
+                0 0 40px #0ff;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 
+                    0 0 10px #0ff,
+                    0 0 20px #0ff,
+                    0 0 30px #0ff,
+                    0 0 40px #0ff;
+            }
+            to {
+                text-shadow: 
+                    0 0 20px #0ff,
+                    0 0 30px #0ff,
+                    0 0 40px #0ff,
+                    0 0 50px #0ff,
+                    0 0 60px #0ff;
+            }
+        }
+
+        .status {
+            font-size: 1.5em;
+            margin: 20px 0;
+            height: 40px;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-gap: 15px;
+            margin: 30px auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+            border: 2px solid #0ff;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.5),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        .cell {
+            width: 120px;
+            height: 120px;
+            background: rgba(10, 10, 10, 0.8);
+            border: 2px solid #f0f;
+            border-radius: 15px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0, 255, 255, 0.3), transparent);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .cell:hover::before {
+            width: 200px;
+            height: 200px;
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+            border-color: #0ff;
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.6),
+                inset 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+
+        .cell.x {
+            color: #0ff;
+            text-shadow: 
+                0 0 10px #0ff,
+                0 0 20px #0ff,
+                0 0 30px #0ff;
+            animation: pulse 0.5s ease;
+        }
+
+        .cell.o {
+            color: #f0f;
+            text-shadow: 
+                0 0 10px rgb(13, 0, 255),
+                0 0 20px rgb(0, 8, 255),
+                0 0 30px rgb(68, 0, 255);
+            animation: pulse 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .cell.winner {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #0f0;
+            animation: winner 0.6s ease infinite;
+        }
+
+        @keyframes winner {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            }
+            50% { 
+                box-shadow: 0 0 40px rgba(0, 255, 0, 1);
+            }
+        }
+
+        .reset-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: transparent;
+            color: #0ff;
+            border: 2px solid #0ff;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+        }
+
+        .reset-btn:hover {
+            background: #0ff;
+            color: #000;
+            box-shadow: 
+                0 0 20px #0ff,
+                0 0 40px #0ff;
+            transform: scale(1.05);
+        }
+
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⭕ Tres en Raya ❌</h1>
+        <div class="status" id="status">Turno: X</div>
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button class="reset-btn" id="reset">Nueva Partida</button>
+        <button class="reset-btn" ><a href="http://127.0.0.1:5500/Inicio.html#juegos">Inicio</a></button>
+    </div>
+
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const status = document.getElementById('status');
+        const resetBtn = document.getElementById('reset');
+        
+        let currentPlayer = 'X';
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
+
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = cell.dataset.index;
+
+            if (board[index] !== '' || !gameActive) return;
+
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
+
+            if (checkWinner()) {
+                status.textContent = `¡${currentPlayer} GANA! 🎮`;
+                status.style.color = '#0f0';
+                status.style.textShadow = '0 0 20px #0f0';
+                gameActive = false;
+                highlightWinner();
+            } else if (board.every(cell => cell !== '')) {
+                status.textContent = '¡EMPATE! 🎯';
+                status.style.color = '#ff0';
+                status.style.textShadow = '0 0 20px #ff0';
+                gameActive = false;
+            } else {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                status.textContent = `Turno: ${currentPlayer}`;
+                status.style.color = currentPlayer === 'X' ? '#0ff' : '#f0f';
+                status.style.textShadow = currentPlayer === 'X' ? '0 0 10px #0ff' : '0 0 10px #f0f';
+            }
+        }
+
+        function checkWinner() {
+            return winPatterns.some(pattern => {
+                const [a, b, c] = pattern;
+                return board[a] !== '' && 
+                       board[a] === board[b] && 
+                       board[a] === board[c];
+            });
+        }
+
+        function highlightWinner() {
+            winPatterns.forEach(pattern => {
+                const [a, b, c] = pattern;
+                if (board[a] !== '' && board[a] === board[b] && board[a] === board[c]) {
+                    cells[a].classList.add('winner');
+                    cells[b].classList.add('winner');
+                    cells[c].classList.add('winner');
+                }
+            });
+        }
+
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            status.textContent = 'Turno: X';
+            status.style.color = '#0ff';
+            status.style.textShadow = '0 0 10px #0ff';
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o', 'winner');
+            });
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetBtn.addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
